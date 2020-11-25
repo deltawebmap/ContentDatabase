@@ -86,7 +86,7 @@ namespace DeltaWebMap.ContentDatabase
                 case WriteCommitObject.SER_TYPE_STRING_ARRAY: return DeserializeDynamicArray<string>(buffer, bufferIndex, (int offset, out int len) =>
                 {
                     len = BitConverter.ToInt32(buffer, bufferIndex + offset) + 4;
-                    return Encoding.UTF8.GetString(buffer, bufferIndex + offset - 4, len);
+                    return Encoding.UTF8.GetString(buffer, bufferIndex + offset + 4, len - 4);
                 });
 
                 case WriteCommitObject.SER_TYPE_OBJECT:
@@ -96,7 +96,7 @@ namespace DeltaWebMap.ContentDatabase
                 case WriteCommitObject.SER_TYPE_OBJECT_ARRAY: return DeserializeDynamicArray<DatabaseObject>(buffer, bufferIndex, (int offset, out int len) =>
                 {
                     DatabaseObject child = new DatabaseObject();
-                    len = child.DeserializeObject(nameTable, buffer, bufferIndex);
+                    len = child.DeserializeObject(nameTable, buffer, bufferIndex + offset);
                     return child;
                 });
 

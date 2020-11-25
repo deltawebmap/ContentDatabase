@@ -36,7 +36,7 @@ namespace DeltaWebMap.ContentDatabase.Framework.BinarySerializer
         {
             //Write string count
             BitConverter.GetBytes((int)value.Length).CopyTo(buffer, bufferPos);
-            int offset = 0;
+            int offset = 4;
 
             //Write each
             for(int i = 0; i<value.Length; i+=1)

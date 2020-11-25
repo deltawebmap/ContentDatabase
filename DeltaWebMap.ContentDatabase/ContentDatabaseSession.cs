@@ -299,25 +299,28 @@ namespace DeltaWebMap.ContentDatabase
         /* Higher level, fast operations */
 
         /// <summary>
-        /// Creates a new commit builder
-        /// </summary>
-        /// <param name="commitId"></param>
-        /// <param name="commitType"></param>
-        /// <returns></returns>
-        public WriteCommit CreateWriteCommit(ulong commitId, byte commitType)
-        {
-            return new WriteCommit(commitId, commitType, this);
-        }
-
-        /// <summary>
         /// Applies a write commit to the disk
         /// </summary>
         /// <param name="commit"></param>
-        public void ApplyWriteCommit(WriteCommit commit)
+        public int ApplyWriteCommit(WriteCommit commit)
         {
             //Loop through and push each object
-            foreach(var c in commit.commits)
-                LowLevelUpsertObject(c.objectId, commit.commitId, c.groupId, commit.commitType, c.blob);
+            int totalSize = 0;
+            foreach (var obj in commit.commits)
+            {
+                //Serialize. Get length
+                int len = obj.GetLength();
+                totalSize += len;
+
+                //Open buffer
+                byte[] payload = new byte[len];
+
+                //Serialize to this
+                obj.SerializeTo(this, payload, 0);
+
+                //Insert
+                LowLevelUpsertObject(obj.objectId, commit.commitId, obj.groupId, commit.commitType, payload);
+            }
 
             //Update name table if needed
             if (nameTableDirty)
@@ -325,6 +328,8 @@ namespace DeltaWebMap.ContentDatabase
 
             //Update TOC
             UpdateToc();
+
+            return totalSize;
         }
 
         /// <summary>
@@ -348,6 +353,29 @@ namespace DeltaWebMap.ContentDatabase
         public FindCommitResults FindAll(int skip = 0, int limit = int.MaxValue)
         {
             return Find(x => true, skip, limit);
+        }
+
+        /// <summary>
+        /// Counts the number of items total
+        /// </summary>
+        /// <returns></returns>
+        public long CountAllItems()
+        {
+            return objects.Count;
+        }
+
+        /// <summary>
+        /// Counts the number of items belonging to a team
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        public long CountTeamItems(int groupId)
+        {
+            long count = 0;
+            foreach (var o in objects)
+                if (o.group_id == groupId)
+                    count++;
+            return count;
         }
     }
 }

@@ -9,31 +9,20 @@ namespace DeltaWebMap.ContentDatabase.CommitBuilders.Write
     {
         public readonly ulong commitId;
         public readonly byte commitType;
-        private INameTableProvider nameTable;
 
-        internal List<WriteCommitObjectFinalized> commits;
+        internal List<WriteCommitObject> commits;
 
-        public WriteCommit(ulong commitId, byte commitType, INameTableProvider nameTable)
+        public WriteCommit(ulong commitId, byte commitType)
         {
             this.commitId = commitId;
             this.commitType = commitType;
-            this.nameTable = nameTable;
-            this.commits = new List<WriteCommitObjectFinalized>();
+            this.commits = new List<WriteCommitObject>();
         }
 
         public void CommitObject(WriteCommitObject obj)
         {
-            //Serialize. Get length
-            int len = obj.GetLength();
-
-            //Open buffer
-            byte[] payload = new byte[len];
-
-            //Serialize to this
-            obj.SerializeTo(nameTable, payload, 0);
-
             //Add
-            commits.Add(new WriteCommitObjectFinalized(obj, payload));
+            commits.Add(obj);
         }
     }
 }
