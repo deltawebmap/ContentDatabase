@@ -349,7 +349,10 @@ namespace DeltaWebMap.ContentDatabase
 
             //Delete
             foreach (var e in entries)
+            {
                 file.DeleteBlob((long)e.page_id);
+                objects.Remove(e);
+            }
 
             //Update TOC
             UpdateToc();
