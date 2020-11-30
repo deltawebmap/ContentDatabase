@@ -38,6 +38,18 @@ namespace DeltaWebMap.ContentDatabase
         }
 
         /// <summary>
+        /// Removes all commits that match this type but do NOT match this ID
+        /// </summary>
+        /// <param name="commit"></param>
+        /// <returns></returns>
+        public Task<int> PruneOldCommitsAsync(ulong commitId, byte commitType)
+        {
+            var cmd = new PruneDatabaseCommand(this, commitId, commitType);
+            controller.QueueCommand(cmd);
+            return cmd.GetTask();
+        }
+
+        /// <summary>
         /// Counts all items belonging to a team
         /// </summary>
         /// <param name="teamId"></param>

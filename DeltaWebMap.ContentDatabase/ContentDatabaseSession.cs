@@ -333,6 +333,31 @@ namespace DeltaWebMap.ContentDatabase
         }
 
         /// <summary>
+        /// Removes content for any commit that has the same type but does not match the commit ID
+        /// </summary>
+        /// <param name="commitId"></param>
+        /// <param name="commitType"></param>
+        public int PruneOldCommits(ulong commitId, byte commitType)
+        {
+            //Look for entries that fit the criteria
+            List<DatabaseObjectHeader> entries = new List<DatabaseObjectHeader>();
+            foreach (var e in objects)
+            {
+                if (e.commit_type == commitType && e.commit_id != commitId)
+                    entries.Add(e);
+            }
+
+            //Delete
+            foreach (var e in entries)
+                file.DeleteBlob((long)e.page_id);
+
+            //Update TOC
+            UpdateToc();
+
+            return entries.Count;
+        }
+
+        /// <summary>
         /// Returns all results in the specified group
         /// </summary>
         /// <param name="groupId"></param>
