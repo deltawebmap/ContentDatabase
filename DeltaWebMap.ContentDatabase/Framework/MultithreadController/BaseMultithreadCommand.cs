@@ -15,6 +15,7 @@ namespace DeltaWebMap.ContentDatabase.Framework.MultithreadController
         }
 
         private Channel<T> channel;
+        private Exception error;
 
         public abstract T Work();
 
@@ -29,6 +30,7 @@ namespace DeltaWebMap.ContentDatabase.Framework.MultithreadController
             catch (Exception ex)
             {
                 //Failed
+                error = ex;
                 channel.Writer.Complete(ex);
                 return;
             }
@@ -40,6 +42,14 @@ namespace DeltaWebMap.ContentDatabase.Framework.MultithreadController
 
         public async Task<T> GetTask()
         {
+            //Wait for completion
+            await this.channel.Reader.Completion;
+
+            //Check if errored
+            if (error != null)
+                throw error;
+
+            //Read
             var result = await this.channel.Reader.ReadAsync();
             return result;
         }
