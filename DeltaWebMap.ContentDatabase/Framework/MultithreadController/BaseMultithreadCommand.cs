@@ -42,16 +42,16 @@ namespace DeltaWebMap.ContentDatabase.Framework.MultithreadController
 
         public async Task<T> GetTask()
         {
-            //Wait for completion
-            await this.channel.Reader.Completion;
-
-            //Check if errored
-            if (error != null)
+            try
+            {
+                //Read
+                var result = await this.channel.Reader.ReadAsync();
+                return result;
+            } catch
+            {
+                //There was an error that was thrown while processing
                 throw error;
-
-            //Read
-            var result = await this.channel.Reader.ReadAsync();
-            return result;
+            }
         }
     }
 }
