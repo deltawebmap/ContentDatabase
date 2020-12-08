@@ -50,7 +50,7 @@ namespace DeltaWebMap.ContentDatabase.Framework.MultithreadController
             } catch
             {
                 //There was an error that was thrown while processing
-                throw error;
+                throw new Exception($"Error handling multithreadded command: {error.Message} {error.StackTrace}");
             }
         }
     }
